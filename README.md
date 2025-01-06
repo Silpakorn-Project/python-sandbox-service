@@ -20,6 +20,15 @@ or
 python -m venv env
 ```
 
+exec env
+```
+windows os
+env/Sources/activate
+
+macos
+source env/bin/activate
+```
+
 install dependency
 ```
 pip install -r requirements.txt
