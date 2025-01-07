@@ -42,6 +42,8 @@ run
 fastapi dev app/main.py
 or
 recommand below
-uvicorn main:app --reload for develop
-uvicorn main:app for production
+for develop
+uvicorn main:app --reload
+for production
+uvicorn main:app 
 ```
