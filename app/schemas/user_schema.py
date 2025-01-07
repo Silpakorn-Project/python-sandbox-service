@@ -6,3 +6,6 @@ class UserModel(BaseModel):
     name: str
     email: str
 
+class NumberModel(BaseModel):
+    number1: int
+    number2: int
