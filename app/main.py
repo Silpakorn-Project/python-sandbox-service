@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.routers import user
+from app.routers import user_router
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 
 app = FastAPI(
@@ -9,7 +9,7 @@ app = FastAPI(
 )
 
 # Include Routersg
-app.include_router(user.router, prefix="/users", tags=["Users"])
+app.include_router(user_router.router, prefix="/users", tags=["Users"])
 
 # TrustedHostMiddleware (case reverse proxy)
 app.add_middleware(TrustedHostMiddleware, allowed_hosts=["*", "localhost", "127.0.0.1"])
