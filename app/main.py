@@ -8,11 +8,12 @@ app = FastAPI(
     root_path="/python-compiler-service",
 )
 
-# Include Routersg
-app.include_router(user_router.router, prefix="/users", tags=["Users"])
-
 # TrustedHostMiddleware (case reverse proxy)
 app.add_middleware(TrustedHostMiddleware, allowed_hosts=["*", "localhost", "127.0.0.1"])
+
+# Include Router
+app.include_router(user_router.router, prefix="/users", tags=["Users"])
+
 
 # Main entrypoint
 @app.get("/")
