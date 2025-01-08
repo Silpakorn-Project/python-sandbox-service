@@ -43,7 +43,7 @@ fastapi dev app/main.py
 or
 recommand below
 for develop
-uvicorn main:app --reload
+uvicorn app.main:app --reload
 for production
-uvicorn main:app 
+uvicorn app.main:app 
 ```
