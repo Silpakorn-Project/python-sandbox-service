@@ -47,3 +47,5 @@ uvicorn app.main:app --reload
 for production
 uvicorn app.main:app 
 ```
+###
+if you want to run sandbox you must wlil build dockerflie and config image name is python-sandbox to be able to run.
