@@ -5,3 +5,5 @@ RUN pip install --no-cache-dir --upgrade pip
 RUN mkdir /sandbox
 WORKDIR /sandbox
 
+RUN python --version
+RUN pip --version
