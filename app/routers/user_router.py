@@ -5,13 +5,13 @@ from app.constant.error_constant import MISSING_FIELD
 
 router = APIRouter()
 
-@router.get("/testCode")
+@router.get("/test-code")
 async def test_sandbox():
     "run code user on container and return output"
     total_score, total_cases = await SandboxService.grade_code()  
     return {"total_score": total_score, "total_cases": total_cases}
 
-@router.get("/testCodeVm")
+@router.get("/test-code-vm")
 async def test_sandbox_container():
     "run code user on container and return output"
     try:
