@@ -39,9 +39,6 @@ pip install -r requirements.txt
 
 run
 ```
-fastapi dev app/main.py
-or
-recommand below
 for develop
 uvicorn app.main:app --reload
 for production
