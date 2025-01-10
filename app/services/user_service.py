@@ -1,18 +1,20 @@
+"Normally Module"
 import asyncio
 import subprocess
 import os
-
-
-
 
 class SandboxService:
     "this is sandbox service"
     @staticmethod
     async def run_user_code(user_code, test_input) -> str:
-        "something."
+        """
+        The run_user_code function executes user-provided Python code using subprocess.run, 
+        captures the output and errors, and handles timeouts gracefully.
+        """
+
         try:
             process = subprocess.run(
-                ["python3", "-c", user_code],  
+                ["python3", "-c", user_code],
                 input=test_input,
                 text=True,
                 capture_output=True,
@@ -52,12 +54,11 @@ class SandboxService:
 
         return total_score, len(test_cases)
 
-
     @staticmethod
     async def run_code_in_docker(user_code2: str, test_input2: str):
         "run code on container"
-        PATH_SUBMISSION = f"{os.getcwd()}/sandbox" if os.getenv("PATH_SUBMISSION") is None else os.getenv("PATH_SUBMISSION") 
-        IMAGE_DOCKER = "python-sandbox:latest" if os.getenv("IMAGE_DOCKER") is None else os.getenv("IMAGE_DOCKER") 
+        path_submission = os.getenv("PATH_SUBMISSION") or f"{os.getcwd()}/sandbox"
+        image_docker = os.getenv("IMAGE_DOCKER") or "python-sandbox:latest"
 
         filename = "./sandbox/user_code.py"
         with open(filename, "w", encoding="utf-8") as f:
@@ -69,8 +70,8 @@ class SandboxService:
                     "docker", "run", "--rm",
                     "--memory=50m",
                     "--cpus=0.5",
-                    "-v", f"{PATH_SUBMISSION}:/sandbox",
-                    f"{IMAGE_DOCKER}",
+                    "-v", f"{path_submission}:/sandbox",
+                    f"{image_docker}",
                     "bash", "-c", f"echo '{test_input2}' | python /sandbox/user_code.py"
                 ],
                 text=True,
@@ -86,4 +87,4 @@ class SandboxService:
         finally:
             if os.path.exists(filename):
                 print(filename)
-                # os.remove(filename)
+                os.remove(filename)

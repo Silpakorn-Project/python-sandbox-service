@@ -8,7 +8,7 @@ router = APIRouter()
 @router.get("/test-code")
 async def test_sandbox():
     "run code user on container and return output"
-    total_score, total_cases = await SandboxService.grade_code()  
+    total_score, total_cases = await SandboxService.grade_code()
     return {"total_score": total_score, "total_cases": total_cases}
 
 @router.get("/test-code-vm")
