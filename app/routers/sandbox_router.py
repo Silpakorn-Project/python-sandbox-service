@@ -1,5 +1,7 @@
 "Module FastApi"
-from fastapi import APIRouter, HTTPException
+import os
+from fastapi import APIRouter, File, HTTPException, UploadFile
+from fastapi.responses import JSONResponse
 from app.services.user_service import SandboxService
 from app.constant.error_constant import MISSING_FIELD
 
@@ -29,3 +31,18 @@ async def test_sandbox_container() -> dict:
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
+
+@router.post("/uploadfile")
+async def upload_file(file: UploadFile = File(...)):
+    "Test upload file"
+    file_location = f"./uploads/{file.filename}"
+
+    os.makedirs(os.path.dirname(file_location), exist_ok=True)
+
+    with open(file_location, "wb") as f:
+        contents = await file.read()
+        f.write(contents)
+
+    return JSONResponse(content={"filename": file.filename,
+                                 "size": len(contents), 
+                                 "path": file_location})
