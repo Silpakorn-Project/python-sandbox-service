@@ -1,5 +1,4 @@
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
 from app.schemas.user_schema import UserModel, NumberModel
 from app.services.user_service import UserService
 
@@ -22,20 +21,21 @@ async def testCode():
 # No vm
 @router.get("/testCode")
 async def testCode():
-    total_score, total_cases = await UserService.grade_code()  # Await the asynchronous function
+    total_score, total_cases = await UserService.grade_code()  
     return {"total_score": total_score, "total_cases": total_cases}
 
 
 @router.get("/testCodeVm")
 async def test_code_vm():
     try:
-        user_code = """print(int(input())**3)"""
+        user_code = """
+print(int(input())**3)
+"""
         test_input = """2""" 
 
         if not user_code or not test_input:
             raise HTTPException(status_code=400, detail="Missing 'code' or 'input' field")
 
-        # รันโค้ดใน Docker
         output, error = await UserService.run_code_in_docker(user_code, test_input)
 
         if error:
