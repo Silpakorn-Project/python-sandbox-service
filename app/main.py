@@ -17,4 +17,3 @@ app.include_router(user_router.router, prefix="/sandbox", tags=["Sandbox"])
 def root():
     "root application"
     return {"message": "Welcome to FastAPI!"}
-
