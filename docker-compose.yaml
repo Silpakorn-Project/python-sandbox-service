@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+  sandbox:
+    container_name: sandbox
+    build:
+      context: .
+      dockerfile: Dockerfile.app
+    ports:
+      - "8001:8000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock # link to host docker socket
+      - submissions:/src/sandbox
+
+
+volumes:
+  submissions:
+    name: submissions
