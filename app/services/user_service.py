@@ -15,10 +15,6 @@ test_cases = [
 
 class UserService:
     @staticmethod
-    async def getUsers() -> str:
-        return "test" 
-
-    @staticmethod
     async def run_user_code(user_code, test_input) -> str:
         "something."
         try:
