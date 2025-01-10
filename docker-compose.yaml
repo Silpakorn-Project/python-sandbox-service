@@ -1,11 +1,15 @@
 version: "3.8"
 
 services:
-  sandbox:
-    container_name: sandbox
+  python-compiler-service:
+    container_name: python-compiler-service
+    image: python-compiler-service:latest
     build:
       context: .
       dockerfile: Dockerfile.app
+    environment:
+      - PATH_SUBMISSION=submissions
+      - IMAGE_DOCKER=python-sandbox:latest
     ports:
       - "8001:8000"
     volumes:
