@@ -6,13 +6,13 @@ from app.constant.error_constant import MISSING_FIELD
 router = APIRouter()
 
 @router.get("/test-code")
-async def test_sandbox():
+async def test_sandbox() -> dict:
     "run code user on container and return output"
     total_score, total_cases = await SandboxService.grade_code()
     return {"total_score": total_score, "total_cases": total_cases}
 
 @router.get("/test-code-vm")
-async def test_sandbox_container():
+async def test_sandbox_container() -> dict:
     "run code user on container and return output"
     try:
         user_code = """print(int(input())**3)"""

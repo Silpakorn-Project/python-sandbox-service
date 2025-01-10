@@ -2,11 +2,12 @@
 import asyncio
 import subprocess
 import os
+from typing import Tuple
 
 class SandboxService:
     "this is sandbox service"
     @staticmethod
-    async def run_user_code(user_code, test_input) -> str:
+    async def run_user_code(user_code, test_input) -> Tuple[str, str]:
         """
         The run_user_code function executes user-provided Python code using subprocess.run, 
         captures the output and errors, and handles timeouts gracefully.
@@ -31,7 +32,7 @@ class SandboxService:
             return None, "Execution Timeout (5 seconds exceeded)"
 
     @staticmethod
-    async def grade_code() -> str:
+    async def grade_code() -> Tuple[int, int]:
         "run all testcase"
         user_code = """x = int(input())\nprint(x * x)"""
         test_cases = [
@@ -55,7 +56,7 @@ class SandboxService:
         return total_score, len(test_cases)
 
     @staticmethod
-    async def run_code_in_docker(user_code2: str, test_input2: str):
+    async def run_code_in_docker(user_code2: str, test_input2: str) -> Tuple[str, str]:
         "run code on container"
         path_submission = os.getenv("PATH_SUBMISSION") or f"{os.getcwd()}/sandbox"
         image_docker = os.getenv("IMAGE_DOCKER") or "python-sandbox:latest"
