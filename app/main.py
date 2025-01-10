@@ -1,7 +1,7 @@
 """Module FastApi"""
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi import FastAPI
-from app.routers import user_router
+from app.routers import sandbox_router
 
 app = FastAPI(
     title="Python Compiler Service",
@@ -11,7 +11,7 @@ app = FastAPI(
 
 app.add_middleware(TrustedHostMiddleware, allowed_hosts=["*", "localhost", "127.0.0.1"])
 
-app.include_router(user_router.router, prefix="/sandbox", tags=["Sandbox"])
+app.include_router(sandbox_router.router, prefix="/sandbox", tags=["Sandbox"])
 
 @app.get("/")
 def root():
