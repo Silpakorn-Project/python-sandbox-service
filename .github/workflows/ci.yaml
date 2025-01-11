@@ -19,12 +19,9 @@ jobs:
       - name: Set up Docker
         uses: docker/setup-buildx-action@v3
       
-      - name: Build docker image python-sandbox
+      - name: Build Docker Image 
         run: | 
           docker build -t python-sandbox:latest -f Dockerfile.sandbox . 
-
-      - name: Build docker image python-compiler-service
-        run: |
           docker build -t python-compiler-service:latest -f Dockerfile.app . 
 
       - name: Run container python-sandbox
@@ -60,7 +57,7 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Push Docker image python-sandbox
+      - name: Push Docker image
         run: |
           docker tag python-sandbox:latest ${{ secrets.DOCKER_USERNAME }}/python-sandbox:latest
           docker tag python-compiler-service:latest ${{ secrets.DOCKER_USERNAME }}/python-compiler-service:latest
