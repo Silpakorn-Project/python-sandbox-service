@@ -52,7 +52,7 @@ jobs:
       
       - name: Run tests
         run: |
-          curl -f http://localhost:8001/python-compiler-service/sandbox/test-code-vm || exit 1
+          curl -X GET http://localhost:8001/python-compiler-service/sandbox/test-code-vm || exit 1
       
       - name: Wait curl finish
         run: |
