@@ -31,17 +31,9 @@ jobs:
         run:  |
           docker run --name python-sandbox python-sandbox
 
-      - name: Wait for container to start
-        run: |
-          sleep 10  # หน่วงเวลา 10 วินาที เพื่อให้แน่ใจว่า container เริ่มทำงานเสร็จ
-
-      - name: Verify container python-sandbox is running
-        run: |
-          docker ps | grep python-sandbox
-
       - name: Run container python-compiler-service 
         run: |
-          docker run \
+          docker run -d \
             --name python-compiler-service \
             --env PATH_SUBMISSION=submission \
             --env IMAGE_DOCKER=python-sandbox:latest \
