@@ -10,7 +10,9 @@ app = FastAPI(
 
 app.add_middleware(TrustedHostMiddleware, allowed_hosts=["*", "localhost", "127.0.0.1"])
 
-app.include_router(sandbox_router.router, prefix="/python-compiler-service/sandbox", tags=["Sandbox"])
+app.include_router(sandbox_router.router,
+                   prefix="/python-compiler-service/sandbox",
+                   tags=["Sandbox"])
 
 @app.get("/")
 def root():

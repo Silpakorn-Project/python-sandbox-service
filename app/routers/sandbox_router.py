@@ -2,7 +2,7 @@
 import os
 from fastapi import APIRouter, File, HTTPException, UploadFile
 from fastapi.responses import JSONResponse
-from app.services.user_service import SandboxService
+from app.services.sandbox_service import SandboxService
 from app.constant.error_constant import MISSING_FIELD
 
 router = APIRouter()
