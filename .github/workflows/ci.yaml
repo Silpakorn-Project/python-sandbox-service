@@ -31,7 +31,7 @@ jobs:
         run:  |
           docker run python-sandbox
 
-       - name: Verify container python-sandbox is running
+      - name: Verify container python-sandbox is running
         run: |
           docker ps | grep python-compiler-service
 
