@@ -61,7 +61,12 @@ class SandboxService:
         path_submission = os.getenv("PATH_SUBMISSION") or f"{os.getcwd()}/sandbox"
         image_docker = os.getenv("IMAGE_DOCKER") or "python-sandbox:latest"
 
+        folder_name = "sandbox"
         filename = "./sandbox/user_code.py"
+
+        if not os.path.exists(filename):
+            os.mkdir(folder_name)
+
         with open(filename, "w", encoding="utf-8") as f:
             f.write(user_code2)
 
