@@ -46,6 +46,10 @@ jobs:
         run: |
           docker ps | grep python-compiler-service
       
+      - name: Wait container start finish
+        run: |
+          sleep(10)
+      
       - name: Run tests
         run: |
           curl -f http://localhost:8001/ || exit 1
