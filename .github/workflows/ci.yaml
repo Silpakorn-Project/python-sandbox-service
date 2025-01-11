@@ -50,7 +50,7 @@ jobs:
             -v submissions:/src/sandbox \
             python-compiler-service:latest 
         
-      - name: Verify container is running
+      - name: Verify container python-compiler-service is running
         run: |
           docker ps | grep python-compiler-service
       
