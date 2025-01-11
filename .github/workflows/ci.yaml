@@ -29,11 +29,11 @@ jobs:
 
       - name: Run container python-sandbox
         run:  |
-          docker run python-sandbox
+          docker run --name python-sandbox python-sandbox
 
       - name: Verify container python-sandbox is running
         run: |
-          docker ps | grep python-compiler-service
+          docker ps | grep python-sandbox
 
       - name: Wait for container to start
         run: |
@@ -50,7 +50,7 @@ jobs:
             -v submissions:/src/sandbox \
             python-compiler-service:latest 
         
-      - name: Verify container is running
+      - name: Verify container python-compiler-service is running
         run: |
           docker ps | grep python-compiler-service
       
