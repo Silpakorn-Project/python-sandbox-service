@@ -63,4 +63,6 @@ jobs:
       - name: Push Docker image python-sandbox
         run: |
           docker tag python-sandbox:latest ${{ secrets.DOCKER_USERNAME }}/python-sandbox:latest
+          docker tag python-compiler-service:latest ${{ secrets.DOCKER_USERNAME }}/python-compiler-service:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/python-sandbox:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/python-compiler-service:latest
