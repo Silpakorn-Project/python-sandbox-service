@@ -35,7 +35,7 @@ jobs:
         run: |
           docker run -d \
             --name python-compiler-service \
-            --env PATH_SUBMISSION=submission \
+            --env PATH_SUBMISSION=submissions \
             --env IMAGE_DOCKER=python-sandbox:latest \
             -p 8001:8000 \
             -v /var/run/docker.sock:/var/run/docker.sock \
@@ -50,14 +50,10 @@ jobs:
         run: |
           sleep 10
       
-      - name: Run tests
+      - name: Run test run code on vm
         run: |
           curl -X GET http://localhost:8001/python-compiler-service/sandbox/test-code-vm || exit 1
       
-      - name: Wait curl finish
-        run: |
-          sleep 1000
-
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
