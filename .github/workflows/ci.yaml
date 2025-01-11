@@ -48,7 +48,7 @@ jobs:
       
       - name: Wait container start finish
         run: |
-          sleep(10)
+          sleep 10
       
       - name: Run tests
         run: |
