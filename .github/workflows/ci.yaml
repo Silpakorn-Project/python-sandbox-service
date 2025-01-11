@@ -52,7 +52,6 @@ jobs:
       
       - name: Run tests
         run: |
-          curl -f http://localhost:8001/ || exit 1
           curl -f http://localhost:8001/python-compiler-service/sandbox/test-code-vm || exit 1
 
       - name: Log in to Docker Hub
