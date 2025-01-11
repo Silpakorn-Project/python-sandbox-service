@@ -17,8 +17,8 @@ async def test_sandbox() -> dict:
 async def test_sandbox_container() -> dict:
     "run code user on container and return output"
     try:
-        user_code = """print(int(input())**3)"""
-        test_input = """2"""
+        user_code = """a=input()\nb=input()\nprint(a, b)"""
+        test_input = """2\n3"""
 
         if not user_code or not test_input:
             raise HTTPException(status_code=400, detail=MISSING_FIELD)

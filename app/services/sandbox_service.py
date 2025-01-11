@@ -62,9 +62,9 @@ class SandboxService:
         image_docker = os.getenv("IMAGE_DOCKER") or "python-sandbox:latest"
 
         folder_name = "./sandbox"
-        filename = "./sandbox/user_code.py"
+        filename = os.path.join(folder_name, "user_code.py")
 
-        if not os.path.exists(folder_name):
+        if not os.path.isdir(folder_name):
             os.mkdir(folder_name)
 
         with open(filename, "w", encoding="utf-8") as f:
