@@ -1,8 +1,9 @@
 "Module FastApi"
 import os
-from fastapi import APIRouter, File, HTTPException, UploadFile
+from fastapi import APIRouter, Body, File, HTTPException, UploadFile
 from fastapi.responses import JSONResponse
-from app.schemas.sandbox_schemas import TestCase
+from app.schemas.request_schema import TestCaseRequest
+from app.schemas.response_schema import BaseResponse, TestCaseResponse
 from app.services.sandbox_service import SandboxService
 from app.constant.error_constant import MISSING_FIELD
 
@@ -48,7 +49,8 @@ async def upload_file(file: UploadFile = File(...)):
                                  "size": len(contents), 
                                  "path": file_location})
 
-@router.post("/")
-async def python_sandbox(file_code_user: UploadFile = File(...), test_case: TestCase = None):
+@router.post("/submitx", response_model=BaseResponse[TestCaseResponse])
+async def python_sandbox_submit(user_request_sandbox: TestCaseRequest = Body(...)
+                                ) -> BaseResponse[TestCaseResponse]:
     "this is python sandbox"
-    return None
+    return await SandboxService.submit(user_request_sandbox)
