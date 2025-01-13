@@ -187,7 +187,7 @@ class SandboxService:
                     test_case_correct += 1
                 else:
                     test_cases_response.append(TestCaseResponse(
-                        passed=True,
+                        passed=False,
                         input=test_case.input,
                         expected=test_case.expected_output,
                         actual=actual_output,
