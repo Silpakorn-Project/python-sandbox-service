@@ -3,12 +3,12 @@ import asyncio
 import logging
 import subprocess
 import os
-from typing import Tuple
+from typing import List, Tuple
 import uuid
 
 from fastapi import HTTPException
-from app.schemas.request_schema import TestCaseRequest
-from app.schemas.response_schema import BaseResponse, TestCaseResponse
+from app.schemas.request_schema import SandboxRequest
+from app.schemas.response_schema import SubmitResponseAll, TestCaseResponse
 
 class SandboxService:
     "this is sandbox service"
@@ -34,7 +34,7 @@ class SandboxService:
             return output, error
 
         except subprocess.TimeoutExpired:
-            return None, "Execution Timeout (5 seconds exceeded)"
+            return "", "Execution Timeout (5 seconds exceeded)"
 
     @staticmethod
     async def grade_code() -> Tuple[int, int]:
@@ -93,7 +93,7 @@ class SandboxService:
             return process.stdout.strip(), process.stderr.strip()
 
         except subprocess.TimeoutExpired:
-            return None, "Execution Timeout (10 seconds exceeded)"
+            return "", "Execution Timeout (10 seconds exceeded)"
 
         finally:
             if os.path.exists(filename):
@@ -102,22 +102,17 @@ class SandboxService:
 
 
     @staticmethod
-    async def submit(user_request_sandbox: TestCaseRequest = None
-        ) -> BaseResponse[TestCaseResponse]:
+    async def submit(sandbox_request: SandboxRequest
+        ) -> SubmitResponseAll:
         "Process file and test case."
         try:
-            if user_request_sandbox is None:
+            if sandbox_request is None:
                 raise ValueError("Test case data is required.")
 
-            if (not user_request_sandbox.file and
-                not user_request_sandbox.input and
-                not user_request_sandbox.expect_output):
+            if (not sandbox_request.source_code and not sandbox_request.test_case):
                 raise ValueError("All data is required")
 
-            if len(user_request_sandbox.input) != len(user_request_sandbox.expect_output):
-                raise ValueError("Error server compute")
-
-            return await SandboxService.run_test(user_request_sandbox)
+            return await SandboxService.run_test(sandbox_request)
 
         except ValueError as ve:
             logging.error("Validation error: %s", ve)
@@ -127,26 +122,27 @@ class SandboxService:
             raise HTTPException(status_code=500, detail="Internal Server Error") from e
 
     @staticmethod
-    async def run_test(user_request_sandbox: TestCaseRequest) -> BaseResponse[TestCaseResponse]:
+    async def run_test(sandbox_request: SandboxRequest) -> SubmitResponseAll:
         "run code on container"
-        path_submission = os.getenv("PATH_SUBMISSION") or f"{os.getcwd()}/sandbox"
-        image_docker = os.getenv("IMAGE_DOCKER") or "python-sandbox:latest"
+        path_submission:str = os.getenv("PATH_SUBMISSION") or f"{os.getcwd()}/sandbox"
+        image_docker:str = os.getenv("IMAGE_DOCKER") or "python-sandbox:latest"
 
-        test_case_total = len(user_request_sandbox.input)
-        test_case_correct = 0
-        test_case_wrong = 0
+        test_case_total:int = len(sandbox_request.test_case)
+        test_case_correct:int = 0
+        test_case_wrong:int = 0
+        test_cases_response: List[TestCaseResponse] = []
+        is_all_passed:bool = True
 
-        for input_, expect_output in zip(user_request_sandbox.input,
-                                         user_request_sandbox.expect_output):
+        for test_case in sandbox_request.test_case:
 
-            folder_name = "./sandbox"
-            unique_filename = f"{uuid.uuid4()}.py"
-            unique_filename_path = os.path.join(folder_name, unique_filename)
+            folder_name:str = "./sandbox"
+            unique_filename:str = f"{uuid.uuid4()}.py"
+            unique_filename_path:str = os.path.join(folder_name, unique_filename)
 
             if not os.path.isdir(folder_name):
                 os.mkdir(folder_name)
 
-            content_file = user_request_sandbox.file
+            content_file:str = sandbox_request.source_code
             with open(unique_filename_path, "w", encoding="utf-8") as f:
                 f.write(content_file)
 
@@ -158,28 +154,59 @@ class SandboxService:
                         "--cpus=0.5",
                         "-v", f"{path_submission}:/sandbox",
                         f"{image_docker}",
-                        "bash", "-c", f"echo '{input_}' | python /sandbox/{unique_filename}"
+                        "bash", "-c", f"echo '{test_case.input}' | python /sandbox/{unique_filename}"
                     ],
                     text=True,
                     capture_output=True,
                     timeout=10
                 )
 
-                found_output, error = process.stdout.strip(), process.stderr.strip()
+                actual_output, error = process.stdout.strip(), process.stderr.strip()
 
                 if error:
+                    test_cases_response.append(TestCaseResponse(
+                        passed=False,
+                        input=test_case.input,
+                        expected=test_case.expected_output,
+                        actual=actual_output,
+                        error=error
+                    ))
                     test_case_wrong += 1
+                    is_all_passed = False
                     logging.error("Error while executing code: %s", error)
                     continue
 
-                if found_output == expect_output:
+                if actual_output == test_case.expected_output:
+                    test_cases_response.append(TestCaseResponse(
+                        passed=True,
+                        input=test_case.input,
+                        expected=test_case.expected_output,
+                        actual=actual_output,
+                        error=None
+                    ))
                     test_case_correct += 1
                 else:
+                    test_cases_response.append(TestCaseResponse(
+                        passed=True,
+                        input=test_case.input,
+                        expected=test_case.expected_output,
+                        actual=actual_output,
+                        error=None
+                    ))
+                    is_all_passed = False
                     test_case_wrong += 1
 
             except subprocess.TimeoutExpired:
                 # return None, "Execution Timeout (10 seconds exceeded)"
                 logging.error("Test case execution timed out (10 seconds exceeded).")
+                test_cases_response.append(TestCaseResponse(
+                        passed=True,
+                        input=test_case.input,
+                        expected=test_case.expected_output,
+                        actual=actual_output,
+                        error=None
+                    ))
+                is_all_passed = False
                 test_case_wrong += 1
 
             finally:
@@ -187,12 +214,10 @@ class SandboxService:
                     print(unique_filename_path)
                     os.remove(unique_filename_path)
 
-        return BaseResponse(
-            status=200,
-            message="something",
-            data=TestCaseResponse(
-                testcase_total=test_case_total,
-                testcase_correct=test_case_correct,
-                testcase_wrong=test_case_wrong,
-            )
+        return SubmitResponseAll(
+            testcase_total=test_case_total,
+            testcase_correct=test_case_correct,
+            testcase_wrong=test_case_wrong,
+            passed=is_all_passed,
+            test_cases=test_cases_response
         )
