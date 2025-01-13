@@ -10,7 +10,7 @@ class TestCaseRequest(BaseModel):
 
     class Config:
         "Example"
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "file": "print(int(input())+1)",
                 "input": ["1"],
