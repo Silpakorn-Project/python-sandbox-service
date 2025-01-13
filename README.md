@@ -2,7 +2,7 @@
 this is a python compiler service
 
 ## Swagger
-http://localhost:8000/python-compiler-service/docs
+http://localhost:8000/docs
 
 ## Installation
 requirements
