@@ -132,23 +132,24 @@ class SandboxService:
         path_submission = os.getenv("PATH_SUBMISSION") or f"{os.getcwd()}/sandbox"
         image_docker = os.getenv("IMAGE_DOCKER") or "python-sandbox:latest"
 
-        folder_name = "./sandbox"
-        unique_filename = f"{uuid.uuid4()}.py"
-        unique_filename_path = os.path.join(folder_name, unique_filename)
-
-        if not os.path.isdir(folder_name):
-            os.mkdir(folder_name)
-
-        content_file = user_request_sandbox.file
-        with open(unique_filename_path, "w", encoding="utf-8") as f:
-            f.write(content_file)
-
         test_case_total = len(user_request_sandbox.input)
         test_case_correct = 0
         test_case_wrong = 0
 
         for input_, expect_output in zip(user_request_sandbox.input,
                                          user_request_sandbox.expect_output):
+
+            folder_name = "./sandbox"
+            unique_filename = f"{uuid.uuid4()}.py"
+            unique_filename_path = os.path.join(folder_name, unique_filename)
+
+            if not os.path.isdir(folder_name):
+                os.mkdir(folder_name)
+
+            content_file = user_request_sandbox.file
+            with open(unique_filename_path, "w", encoding="utf-8") as f:
+                f.write(content_file)
+
             try:
                 process = await asyncio.to_thread(subprocess.run,
                     [
