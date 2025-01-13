@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   python-compiler-service:
     container_name: python-compiler-service
@@ -15,6 +13,15 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock # link to host docker socket
       - submissions:/src/sandbox
+  
+  python-sandbox:
+    container_name: python-sandbox
+    image: python-sandbox:latest 
+    build:
+      context: .
+      dockerfile: Dockerfile.sandbox
+    working_dir: /sandbox
+    command: python --version
 
 
 volumes:
