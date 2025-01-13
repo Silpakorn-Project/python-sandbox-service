@@ -204,7 +204,7 @@ class SandboxService:
                         input=test_case.input,
                         expected=test_case.expected_output,
                         actual=actual_output,
-                        error=None
+                        error="Test case execution timed out (10 seconds exceeded)."
                     ))
                 is_all_passed = False
                 test_case_wrong += 1
