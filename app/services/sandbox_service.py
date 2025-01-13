@@ -149,7 +149,7 @@ class SandboxService:
             try:
                 process = await asyncio.to_thread(subprocess.run,
                     [
-                        "docker", "run", "--rm",
+                        "docker", "run", "--rm", "--name", f"{unique_filename[:-3]}",
                         "--memory=50m",
                         "--cpus=0.5",
                         "-v", f"{path_submission}:/sandbox",
@@ -200,10 +200,10 @@ class SandboxService:
                 # return None, "Execution Timeout (10 seconds exceeded)"
                 logging.error("Test case execution timed out (10 seconds exceeded).")
                 test_cases_response.append(TestCaseResponse(
-                        passed=True,
+                        passed=False,
                         input=test_case.input,
                         expected=test_case.expected_output,
-                        actual=actual_output,
+                        actual="",
                         error="Test case execution timed out (10 seconds exceeded)."
                     ))
                 is_all_passed = False
@@ -213,6 +213,17 @@ class SandboxService:
                 if os.path.exists(unique_filename_path):
                     print(unique_filename_path)
                     os.remove(unique_filename_path)
+
+                try:
+                    subprocess.run(
+                        ["docker", "rm", "-f", f"{unique_filename[:-3]}"],
+                        check=False,
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL
+                    )
+                except subprocess.SubprocessError as e:
+                    logging.error("Error while removing Docker container: %s", e)
+
 
         return SubmitResponseAll(
             testcase_total=test_case_total,
