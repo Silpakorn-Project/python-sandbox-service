@@ -37,6 +37,11 @@ install dependency
 pip install -r requirements.txt
 ```
 
+install image docker python-sandbox
+```
+docker build -t python-sandbox:latest . Dockerfile.sandbox
+```
+
 run
 ```
 for develop
