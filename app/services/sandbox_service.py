@@ -150,11 +150,13 @@ class SandboxService:
                 process = await asyncio.to_thread(subprocess.run,
                     [
                         "docker", "run", "--rm", "--name", f"{unique_filename[:-3]}",
-                        "--memory=50m",
-                        "--cpus=0.5",
+                        "--memory=50m", "--cpus=0.5",
                         "-v", f"{path_submission}:/sandbox",
                         f"{image_docker}",
-                        "bash", "-c", f"echo '{test_case.input}' | python /sandbox/{unique_filename}"
+                        "bash", "-c", (
+                            f"echo '{test_case.input}' | "
+                            f"python /sandbox/{unique_filename}"
+                        )
                     ],
                     text=True,
                     capture_output=True,
