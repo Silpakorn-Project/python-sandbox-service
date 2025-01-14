@@ -1,5 +1,4 @@
 "Handlers"
-from datetime import datetime
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from app.exceptions.custom_error import CustomError
