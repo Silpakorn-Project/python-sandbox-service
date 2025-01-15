@@ -102,16 +102,10 @@ class SandboxService:
 
 
     @staticmethod
-    async def submit(sandbox_request: SandboxRequest
-        ) -> SubmitResponseAll:
-        "Process file and test case."
+    async def submit(sandbox_request: SandboxRequest) -> SubmitResponseAll:
+        """Process file and test case."""
         try:
-            if sandbox_request is None:
-                raise ValueError("Test case data is required.")
-
-            if (not sandbox_request.source_code and not sandbox_request.test_case):
-                raise ValueError("All data is required")
-
+            SandboxService.validate_request(sandbox_request)
             return await SandboxService.run_test(sandbox_request)
 
         except ValueError as ve:
@@ -122,47 +116,71 @@ class SandboxService:
             raise HTTPException(status_code=500, detail="Internal Server Error") from e
 
     @staticmethod
-    async def run_test(sandbox_request: SandboxRequest) -> SubmitResponseAll:
-        "run code on container"
-        path_submission:str = os.getenv("PATH_SUBMISSION") or f"{os.getcwd()}/sandbox"
-        image_docker:str = os.getenv("IMAGE_DOCKER") or "python-sandbox:latest"
+    def validate_request(sandbox_request: SandboxRequest):
+        """Validate the sandbox request."""
+        if sandbox_request is None:
+            raise ValueError("Test case data is required.")
+        if not sandbox_request.source_code or not sandbox_request.test_case:
+            raise ValueError("All data is required")
 
-        test_case_total:int = len(sandbox_request.test_case)
-        test_case_correct:int = 0
-        test_case_wrong:int = 0
+    @staticmethod
+    def create_file(content: str, folder_name: str, unique_filename: str) -> str:
+        """Create a Python file with the given content."""
+        if not os.path.isdir(folder_name):
+            os.mkdir(folder_name)
+        unique_filename_path = os.path.join(folder_name, unique_filename)
+        with open(unique_filename_path, "w", encoding="utf-8") as f:
+            f.write(content)
+        return unique_filename_path
+
+    @staticmethod
+    def delete_file(file_path: str):
+        """Delete a file."""
+        if os.path.exists(file_path):
+            os.remove(file_path)
+
+    @staticmethod
+    def run_docker(image: str, path_submission: str,
+                   unique_filename: str, test_input: str
+                   ) -> subprocess.CompletedProcess:
+        """Run the Docker container to execute the code."""
+        return subprocess.run(
+            [
+                "docker", "run", "--rm", "--name", f"{unique_filename[:-3]}",
+                "--memory=50m", "--cpus=0.5",
+                "-v", f"{path_submission}:/sandbox",
+                image,
+                "bash", "-c", f"echo '{test_input}' | python /sandbox/{unique_filename}"
+            ],
+            text=True,
+            capture_output=True,
+            timeout=10,
+            check=False
+        )
+
+    @staticmethod
+    async def run_test(sandbox_request: SandboxRequest) -> SubmitResponseAll:
+        """Run code on a container."""
+        path_submission: str = os.getenv("PATH_SUBMISSION") or f"{os.getcwd()}/sandbox"
+        image_docker: str = os.getenv("IMAGE_DOCKER") or "python-sandbox:latest"
+
+        test_case_total: int = len(sandbox_request.test_case)
+        test_case_correct: int = 0
+        test_case_wrong: int = 0
         test_cases_response: List[TestCaseResponse] = []
-        is_all_passed:bool = True
+        is_all_passed: bool = True
 
         for test_case in sandbox_request.test_case:
-
-            folder_name:str = "./sandbox"
-            unique_filename:str = f"{uuid.uuid4()}.py"
-            unique_filename_path:str = os.path.join(folder_name, unique_filename)
-
-            if not os.path.isdir(folder_name):
-                os.mkdir(folder_name)
-
-            content_file:str = sandbox_request.source_code
-            with open(unique_filename_path, "w", encoding="utf-8") as f:
-                f.write(content_file)
+            folder_name = "./sandbox"
+            unique_filename = f"{uuid.uuid4()}.py"
+            unique_filename_path = SandboxService.create_file(sandbox_request.source_code,
+                                                              folder_name,
+                                                              unique_filename)
 
             try:
-                process = await asyncio.to_thread(subprocess.run,
-                    [
-                        "docker", "run", "--rm", "--name", f"{unique_filename[:-3]}",
-                        "--memory=50m", "--cpus=0.5",
-                        "-v", f"{path_submission}:/sandbox",
-                        f"{image_docker}",
-                        "bash", "-c", (
-                            f"echo '{test_case.input}' | "
-                            f"python /sandbox/{unique_filename}"
-                        )
-                    ],
-                    text=True,
-                    capture_output=True,
-                    timeout=10
-                )
-
+                process = await asyncio.to_thread(SandboxService.run_docker,
+                                                  image_docker, path_submission,
+                                                  unique_filename, test_case.input)
                 actual_output, error = process.stdout.strip(), process.stderr.strip()
 
                 if error:
@@ -175,10 +193,7 @@ class SandboxService:
                     ))
                     test_case_wrong += 1
                     is_all_passed = False
-                    logging.error("Error while executing code: %s", error)
-                    continue
-
-                if actual_output == test_case.expected_output:
+                elif actual_output == test_case.expected_output:
                     test_cases_response.append(TestCaseResponse(
                         passed=True,
                         input=test_case.input,
@@ -195,27 +210,23 @@ class SandboxService:
                         actual=actual_output,
                         error=None
                     ))
-                    is_all_passed = False
                     test_case_wrong += 1
+                    is_all_passed = False
 
             except subprocess.TimeoutExpired:
-                # return None, "Execution Timeout (10 seconds exceeded)"
                 logging.error("Test case execution timed out (10 seconds exceeded).")
                 test_cases_response.append(TestCaseResponse(
-                        passed=False,
-                        input=test_case.input,
-                        expected=test_case.expected_output,
-                        actual="",
-                        error="Test case execution timed out (10 seconds exceeded)."
-                    ))
-                is_all_passed = False
+                    passed=False,
+                    input=test_case.input,
+                    expected=test_case.expected_output,
+                    actual="",
+                    error="Test case execution timed out (10 seconds exceeded)."
+                ))
                 test_case_wrong += 1
+                is_all_passed = False
 
             finally:
-                if os.path.exists(unique_filename_path):
-                    print(unique_filename_path)
-                    os.remove(unique_filename_path)
-
+                SandboxService.delete_file(unique_filename_path)
                 try:
                     subprocess.run(
                         ["docker", "rm", "-f", f"{unique_filename[:-3]}"],
@@ -225,7 +236,6 @@ class SandboxService:
                     )
                 except subprocess.SubprocessError as e:
                     logging.error("Error while removing Docker container: %s", e)
-
 
         return SubmitResponseAll(
             testcase_total=test_case_total,
