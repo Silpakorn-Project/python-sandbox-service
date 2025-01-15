@@ -10,7 +10,7 @@ Access the API documentation with Swagger:
 
 ### **Requirements**  
 - Python **3.13.1**  
-- Docker (optional but recommended for sandbox environments)
+- Docker (required for running sandbox environments and ensuring the code execution functionality)
 
 ### **Setup Instructions**  
 
