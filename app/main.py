@@ -1,7 +1,6 @@
 """Module FastApi"""
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi import FastAPI
-from app.exceptions.custom_error import CustomError
 from app.routers import sandbox_router
 from app.exceptions.handlers import setup_exception_handlers
 
@@ -21,11 +20,4 @@ app.include_router(sandbox_router.router,
 @app.get("/")
 def root():
     "root application"
-    return {"message": "Python Compiler Service"}
-
-@app.get("/test-exception")
-def test_exception(item_id: int):
-    "test"
-    if item_id < 1:
-        raise CustomError(error_code=404, message="Item ID must be greater than 0.")
     return {"message": "Python Compiler Service"}

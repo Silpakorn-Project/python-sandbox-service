@@ -6,7 +6,7 @@ import os
 from typing import List, Tuple
 import uuid
 
-from fastapi import HTTPException
+from app.exceptions.custom_error import MissingRequiredArgumentsException
 from app.schemas.request_schema import SandboxRequest
 from app.schemas.response_schema import SubmitResponseAll, TestCaseResponse
 
@@ -104,24 +104,18 @@ class SandboxService:
     @staticmethod
     async def submit(sandbox_request: SandboxRequest) -> SubmitResponseAll:
         """Process file and test case."""
-        try:
-            SandboxService.validate_request(sandbox_request)
-            return await SandboxService.run_test(sandbox_request)
-
-        except ValueError as ve:
-            logging.error("Validation error: %s", ve)
-            raise HTTPException(status_code=400, detail=str(ve)) from ve
-        except Exception as e:
-            logging.exception("An unexpected error occurred.")
-            raise HTTPException(status_code=500, detail="Internal Server Error") from e
+        SandboxService.validate_request(sandbox_request)
+        return await SandboxService.run_test(sandbox_request)
 
     @staticmethod
     def validate_request(sandbox_request: SandboxRequest):
         """Validate the sandbox request."""
-        if sandbox_request is None:
-            raise ValueError("Test case data is required.")
-        if not sandbox_request.source_code or not sandbox_request.test_case:
-            raise ValueError("All data is required")
+        if sandbox_request.source_code is None or sandbox_request.source_code == "":
+            raise MissingRequiredArgumentsException("Empty source.code")
+        if (sandbox_request.test_case is None
+            or sandbox_request.test_case == ""
+            or len(sandbox_request.test_case) == 0):
+            raise MissingRequiredArgumentsException("Empty testcase")
 
     @staticmethod
     def create_file(content: str, folder_name: str, unique_filename: str) -> str:
