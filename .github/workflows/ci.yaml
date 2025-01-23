@@ -19,29 +19,29 @@ jobs:
       - name: Set up Docker
         uses: docker/setup-buildx-action@v3
       
-      - name: Build Docker Image 
+      - name: Build Docker Image
         run: | 
           docker build -t python-sandbox:latest -f Dockerfile.sandbox . 
-          docker build -t python-compiler-service:latest -f Dockerfile.app . 
+          docker build -t python-sandbox-service:latest -f Dockerfile.app . 
 
       - name: Run container python-sandbox
         run:  |
           docker run --name python-sandbox python-sandbox
 
-      - name: Run container python-compiler-service 
+      - name: Run container python-sandbox-service 
         run: |
           docker run -d \
-            --name python-compiler-service \
+            --name python-sandbox-service \
             --env PATH_SUBMISSION=submissions \
             --env IMAGE_DOCKER=python-sandbox:latest \
             -p 8001:8000 \
             -v /var/run/docker.sock:/var/run/docker.sock \
             -v submissions:/src/sandbox \
-            python-compiler-service:latest 
+            python-sandbox-service:latest 
         
       - name: Verify container python-compiler-service is running
         run: |
-          docker ps | grep python-compiler-service
+          docker ps | grep python-sandbox-service
       
       - name: Wait container start finish
         run: |
@@ -49,7 +49,7 @@ jobs:
       
       - name: Run test run code on vm
         run: |
-          curl -X GET http://localhost:8001/python-compiler-service/sandbox/test-code-vm || exit 1
+          curl -X GET http://localhost:8001/python-sandbox-service/sandbox/test-code-vm || exit 1
       
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
@@ -60,6 +60,6 @@ jobs:
       - name: Push Docker image
         run: |
           docker tag python-sandbox:latest ${{ secrets.DOCKER_USERNAME }}/python-sandbox:latest
-          docker tag python-compiler-service:latest ${{ secrets.DOCKER_USERNAME }}/python-compiler-service:latest
+          docker tag python-sandbox-service:latest ${{ secrets.DOCKER_USERNAME }}/python-sandbox-service:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/python-sandbox:latest
-          docker push ${{ secrets.DOCKER_USERNAME }}/python-compiler-service:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/python-sandbox-service:latest
