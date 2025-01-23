@@ -5,7 +5,7 @@ from app.routers import sandbox_router
 from app.exceptions.handlers import setup_exception_handlers
 
 app = FastAPI(
-    title="Python Compiler Service",
+    title="Python Sandbox Service",
     version="1.0.0",
 )
 
@@ -20,4 +20,4 @@ app.include_router(sandbox_router.router,
 @app.get("/")
 def root():
     "root application"
-    return {"message": "Python Compiler Service"}
+    return {"message": "Python Sandbox Service"}
