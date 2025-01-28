@@ -97,6 +97,7 @@ jobs:
         id: run-container-python-sandbox
         run:  |
           docker run --name python-sandbox ${{ secrets.DOCKER_USERNAME }}/python-sandbox:${{ needs.semantic-versioning.outputs.version }} 
+        continue-on-error: true
 
       - name: Run container python-sandbox-service 
         id: run-container-python-sandbox-service
@@ -109,6 +110,7 @@ jobs:
             -v /var/run/docker.sock:/var/run/docker.sock \
             -v submissions:/src/sandbox \
             ${{ secrets.DOCKER_USERNAME }}/python-sandbox-service:${{ needs.semantic-versioning.outputs.version }}
+        continue-on-error: true
         
       - name: Verify container python-compiler-service is running
         run: |
@@ -128,21 +130,32 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Push Docker image
-        id: push-image
+      - name: Push Docker image sandbox
+        id: push-image-sandbox
         run: |
           docker push ${{ secrets.DOCKER_USERNAME }}/python-sandbox:${{ needs.semantic-versioning.outputs.version }}
           docker tag ${{ secrets.DOCKER_USERNAME }}/python-sandbox:${{ needs.semantic-versioning.outputs.version }} ${{ secrets.DOCKER_USERNAME }}/python-sandbox:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/python-sandbox:latest
-      
 
+        continue-on-error: true
+      
+      - name: Push Docker image service
+        id: push-image-service
+        run: |
           docker push ${{ secrets.DOCKER_USERNAME }}/python-sandbox-service:${{ needs.semantic-versioning.outputs.version }}
           docker tag ${{ secrets.DOCKER_USERNAME }}/python-sandbox-service:${{ needs.semantic-versioning.outputs.version }} ${{ secrets.DOCKER_USERNAME }}/python-sandbox-service:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/python-sandbox-service:latest
+
         continue-on-error: true
       
       - name: Remove Tag if Push Fails
-        if: failure() || steps.push-docker.outcome == 'failure' || steps.build-docker.outcome == 'failure'
+        if: |
+          failure() || 
+          steps.run-container-python-sandbox.outcome == 'failure' || 
+          steps.run-container-python-sandbox-service.outcome == 'failure' || 
+          steps.run-test-code-vm.outcome == 'failure' || 
+          steps.push-image-sandbox.outcome == 'failure' ||
+          steps.push-image-service.outcome == 'failure'
         run: |
           echo "Push failed, deleting tag..."
           git fetch --tags # ดึงข้อมูล tag ล่าสุดจาก remote
