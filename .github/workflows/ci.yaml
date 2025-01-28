@@ -104,15 +104,15 @@ jobs:
           docker run -d \
             --name python-sandbox-service \
             --env PATH_SUBMISSION=submissions \
-            --env IMAGE_DOCKER=python-sandbox:latest \
+            --env IMAGE_DOCKER=${{ secrets.DOCKER_USERNAME }}/python-sandbox:${{ needs.semantic-versioning.outputs.version }} \
             -p 8001:8000 \
             -v /var/run/docker.sock:/var/run/docker.sock \
             -v submissions:/src/sandbox \
-            python-sandbox-service:latest 
+            ${{ secrets.DOCKER_USERNAME }}/python-sandbox-service:${{ needs.semantic-versioning.outputs.version }}
         
       - name: Verify container python-compiler-service is running
         run: |
-          docker ps | grep python-sandbox-service
+          docker ps | grep ${{ secrets.DOCKER_USERNAME }}/python-sandbox-service:${{ needs.semantic-versioning.outputs.version }}
       
       - name: Wait container start finish
         run: |
