@@ -5,6 +5,10 @@ on:
     branches:
       - main
 
+permissions:
+  contents: write
+  pull-requests: read
+
 jobs:
 
   semantic-versioning:
@@ -69,6 +73,7 @@ jobs:
       version: ${{ env.NEW_VERSION }}
 
   build:
+    needs: semantic-versioning
     runs-on: ubuntu-latest
 
     steps:
@@ -91,7 +96,7 @@ jobs:
       - name: Run container python-sandbox
         id: run-container-python-sandbox
         run:  |
-          docker run --name python-sandbox python-sandbox
+          docker run --name python-sandbox ${{ secrets.DOCKER_USERNAME }}/python-sandbox:${{ needs.semantic-versioning.outputs.version }} 
 
       - name: Run container python-sandbox-service 
         id: run-container-python-sandbox-service
