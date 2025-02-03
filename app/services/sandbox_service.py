@@ -112,9 +112,9 @@ class SandboxService:
         """Validate the sandbox request."""
         if sandbox_request.source_code is None or sandbox_request.source_code == "":
             raise MissingRequiredArgumentsException("Empty source.code")
-        if (sandbox_request.test_case is None
-            or sandbox_request.test_case == ""
-            or len(sandbox_request.test_case) == 0):
+        if (sandbox_request.test_cases is None
+            or sandbox_request.test_cases == ""
+            or len(sandbox_request.test_cases) == 0):
             raise MissingRequiredArgumentsException("Empty testcase")
 
     @staticmethod
@@ -158,13 +158,13 @@ class SandboxService:
         path_submission: str = os.getenv("PATH_SUBMISSION") or f"{os.getcwd()}/sandbox"
         image_docker: str = os.getenv("IMAGE_DOCKER") or "python-sandbox:latest"
 
-        test_case_total: int = len(sandbox_request.test_case)
+        test_case_total: int = len(sandbox_request.test_cases)
         test_case_correct: int = 0
         test_case_wrong: int = 0
         test_cases_response: List[TestCaseResponse] = []
         is_all_passed: bool = True
 
-        for test_case in sandbox_request.test_case:
+        for test_case in sandbox_request.test_cases:
             folder_name = "./sandbox"
             unique_filename = f"{uuid.uuid4()}.py"
             unique_filename_path = SandboxService.create_file(sandbox_request.source_code,
