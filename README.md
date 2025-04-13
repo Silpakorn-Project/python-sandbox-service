@@ -68,6 +68,7 @@ For the sandbox functionality, ensure the Dockerfile is properly built and the i
 ### **Development Mode**  
 ```bash
 uvicorn app.main:app --reload
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8001
 ```
 
 ### **Production Mode**  

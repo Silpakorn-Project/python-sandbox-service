@@ -13,7 +13,7 @@ class TestCaseResponse(BaseModel):
 class SubmitResponseAll(BaseModel):
     "BaseResponse"
     testcase_total: int
-    testcase_correct: int
+    testcase_passed: int
     testcase_wrong: int
     passed: bool
     test_cases: List[TestCaseResponse]

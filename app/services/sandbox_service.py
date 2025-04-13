@@ -233,7 +233,7 @@ class SandboxService:
 
         return SubmitResponseAll(
             testcase_total=test_case_total,
-            testcase_correct=test_case_correct,
+            testcase_passed=test_case_correct,
             testcase_wrong=test_case_wrong,
             passed=is_all_passed,
             test_cases=test_cases_response
