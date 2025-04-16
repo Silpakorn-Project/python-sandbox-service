@@ -9,7 +9,7 @@ services:
       - PATH_SUBMISSION=submissions
       - IMAGE_DOCKER=python-sandbox:latest
     ports:
-      - "8001:8000"
+      - "8001:8001"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock # link to host docker socket
       - submissions:/src/sandbox
