@@ -104,13 +104,13 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t python-compiler-service -f Dockerfile.app . 
-          docker tag python-compiler-service ${{ secrets.DOCKER_USERNAME }}/python-compiler-service:latest
-          docker push ${{ secrets.DOCKER_USERNAME }}/python-compiler-service:latest
+          docker build -t python-sandbox-service -f Dockerfile.app . 
+          docker tag python-sandbox-service ${{ secrets.DOCKER_USERNAME }}/python-sandbox-service:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/python-sandbox-service:latest
 
           # Tag the image with the new version
-          docker tag python-compiler-service ${{ secrets.DOCKER_USERNAME }}/python-compiler-service:${{ needs.version.outputs.new_version }}
-          docker push ${{ secrets.DOCKER_USERNAME }}/python-compiler-service:${{ needs.version.outputs.new_version }}
+          docker tag python-sandbox-service ${{ secrets.DOCKER_USERNAME }}/python-sandbox-service:${{ needs.version.outputs.new_version }}
+          docker push ${{ secrets.DOCKER_USERNAME }}/python-sandbox-service:${{ needs.version.outputs.new_version }}
 
           # Python sandbox must not have the version tag
           docker build -t python-sandbox -f Dockerfile.sandbox . 
